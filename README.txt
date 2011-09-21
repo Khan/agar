@@ -20,7 +20,7 @@ your Google App Engine project. It must be on your path.
 License
 -------
 
-Agar is licensed under the XYZ License. See LICENSE.txt for details.
+Agar is licensed under the MIT License. See LICENSE.txt for details.
 
 Tests
 -----
@@ -35,7 +35,13 @@ Testing
 -------
 
 Google App Engine now includes testbed to make local unit testing
-easier. This obsoletes the GAE TestBed library. However, it had
-several useful helper functions, many of which have been
-re-implemented in Agar. To use them, you must use unittest2 and
-inherit from agar.tests.BaseTest or agar.tests.WebTest.
+easier. This obsoletes the now-unsupported GAE TestBed
+library. However, it had several useful helper functions, many of
+which have been re-implemented in Agar. To use them, you must use
+unittest2 and inherit from agar.tests.BaseTest or agar.tests.WebTest.
+
+Contributing
+------------
+
+To contribute to the Agar project, fork the repository, make your
+changes, and submit a pull request.
