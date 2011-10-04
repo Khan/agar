@@ -21,7 +21,26 @@ class WebTest(TestCase):
     def get(self, url, params=None, headers=None, extra_environ=None):
         return self.app.get(url, params=params, headers=headers, status="*", expect_errors=True)
 
+    def post(self, url, params='', headers=None, extra_environ=None, upload_files=None):
+        return self.app.post(url, params, headers=headers, status="*", expect_errors=True, upload_files=upload_files)
+
     def assertOK(self, response):
         self.assertEqual(200, response.status_int)
 
+    def assertRedirects(self, response, to=None):
+        self.assertEqual(302, response.status_int)
+        
+        if to:
+            if not to.startswith("http"):
+                to = 'http://localhost%s' % to
+
+            self.assertEqual(response.headers['Location'], to)
+
+    def assertForbidden(self, response):
+        self.assertEqual(403, response.status_int)
+
+    def assertNotFound(self, response):
+        self.assertEqual(404, response.status_int)
+
+        
     
