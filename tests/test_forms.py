@@ -1,6 +1,8 @@
 import urllib
 
 from unittest2 import TestCase
+from webapp2 import WSGIApplication
+from webtest import Request
 
 from agar.url import uri_for
 from agar.test import BaseTest, WebTest
@@ -55,6 +57,7 @@ class FormTest(JsonWebTestCase, WebTest):
     APPLICATION = application
 
     def setUp(self):
+        WSGIApplication.request = Request.blank("/")
         self.uri = uri_for('api-v1')
         super(FormTest, self).setUp()
 
