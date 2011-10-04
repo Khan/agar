@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    webapp2_extras
-    ==============
+    webapp2_extras.appengine
+    ========================
 
-    Extra modules for webapp2.
+    App Engine-specific modules.
 
     :copyright: 2011 by tipfy.org.
     :license: Apache Sotware License, see LICENSE for details.

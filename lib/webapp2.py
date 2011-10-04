@@ -11,75 +11,71 @@
 from __future__ import with_statement
 
 import cgi
+import inspect
 import logging
 import os
 import re
+import sys
 import threading
 import urllib
 import urlparse
+from wsgiref import handlers
 
 import webob
 from webob import exc
 
-try: # pragma: no cover
+_webapp = _webapp_util = _local = None
+
+try:  # pragma: no cover
     # WebOb < 1.0 (App Engine Python 2.5).
     from webob.statusreasons import status_reasons
     from webob.headerdict import HeaderDict as BaseResponseHeaders
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     # WebOb >= 1.0.
     from webob.util import status_reasons
     from webob.headers import ResponseHeaders as BaseResponseHeaders
 
-if os.environ.get('APPENGINE_RUNTIME') == 'python27': # pragma: no cover
-    # google.appengine.ext.webapp imports webapp2 in the App Engine Python 2.7
-    # runtime.
-    webapp = None
-else: # pragma: no cover
+# google.appengine.ext.webapp imports webapp2 in the
+# App Engine Python 2.7 runtime.
+if os.environ.get('APPENGINE_RUNTIME') != 'python27':  # pragma: no cover
     try:
-        from google.appengine.ext import webapp
-    except ImportError: # pragma: no cover
+        from google.appengine.ext import webapp as _webapp
+    except ImportError:  # pragma: no cover
         # Running webapp2 outside of GAE.
-        webapp = None
-
-if webapp is None: # pragma: no cover
-    class webapp(object):
-        RequestHandler = type('RequestHandler', (object,), {})
+        pass
 
 try:
-    from google.appengine.ext.webapp import util
-except ImportError: # pragma: no cover
-    from wsgiref import handlers
+    from google.appengine.ext.webapp import util as _webapp_util
+except ImportError:  # pragma: no cover
+    pass
 
-    class util(object):
-        def _run(app):
-            handlers.CGIHandler().run(app)
-
-        run_wsgi_app = run_bare_wsgi_app = staticmethod(_run)
-
-try:
-    # Thread-safety support.
+try:  # pragma: no cover
+    # Thread-local variables container.
     from webapp2_extras import local
-except ImportError: # pragma: no cover
+    _local = local.Local()
+except ImportError:  # pragma: no cover
     logging.warning("webapp2_extras.local is not available "
                     "so webapp2 won't be thread-safe!")
-    local = None
 
-__version_info__ = (2, 0, 2)
+
+__version_info__ = (2, 3)
 __version__ = '.'.join(str(n) for n in __version_info__)
 
 #: Base HTTP exception, set here as public interface.
 HTTPException = exc.HTTPException
 
 #: Regex for route definitions.
-_ROUTE_REGEX = re.compile(r"""
+_route_re = re.compile(r"""
     \<               # The exact character "<"
     ([a-zA-Z_]\w*)?  # The optional variable name
     (?:\:([^\>]*))?  # The optional :regex part
     \>               # The exact character ">"
     """, re.VERBOSE)
+#: Regex extract charset from environ.
+_charset_re = re.compile(r';\s*charset=([^;]*)', re.I)
 
 # Set same default messages from webapp plus missing ones.
-webapp_status_reasons = {
+_webapp_status_reasons = {
     203: 'Non-Authoritative Information',
     302: 'Moved Temporarily',
     306: 'Unused',
@@ -88,8 +84,8 @@ webapp_status_reasons = {
     504: 'Gateway Time-out',
     505: 'HTTP Version not supported',
 }
-status_reasons.update(webapp_status_reasons)
-for code, message in webapp_status_reasons.iteritems():
+status_reasons.update(_webapp_status_reasons)
+for code, message in _webapp_status_reasons.iteritems():
     cls = exc.status_map.get(code)
     if cls:
         cls.title = message
@@ -125,11 +121,18 @@ class Request(webob.Request):
         :param environ:
             A WSGI-compliant environment dictionary.
         """
-        unicode_errors = kwargs.pop('unicode_errors', 'ignore')
-        decode_param_names = kwargs.pop('decode_param_names', True)
-        super(Request, self).__init__(environ, unicode_errors=unicode_errors,
-                                      decode_param_names=decode_param_names,
-                                      *args, **kwargs)
+        if kwargs.get('charset') is None:
+            match = _charset_re.search(environ.get('CONTENT_TYPE', ''))
+            if match:
+                charset = match.group(1).lower().strip().strip('"').strip()
+            else:
+                charset = 'utf-8'
+
+            kwargs['charset'] = charset
+
+        kwargs.setdefault('unicode_errors', 'ignore')
+        kwargs.setdefault('decode_param_names', True)
+        super(Request, self).__init__(environ, *args, **kwargs)
         self.registry = {}
 
     def get(self, argument_name, default_value='', allow_multiple=False):
@@ -237,7 +240,7 @@ class Request(webob.Request):
 
     @classmethod
     def blank(cls, path, environ=None, base_url=None,
-              headers=None, **kwargs): # pragma: no cover
+              headers=None, **kwargs):  # pragma: no cover
         """Adds parameters compatible with WebOb >= 1.0: POST and **kwargs."""
         try:
             return super(Request, cls).blank(path, environ=environ,
@@ -286,7 +289,8 @@ class ResponseHeaders(BaseResponseHeaders):
 
         Example::
 
-            h.add_header('content-disposition', 'attachment', filename='bud.gif')
+            h.add_header('content-disposition', 'attachment',
+                         filename='bud.gif')
 
         Note that unlike the corresponding 'email.message' method, this does
         *not* handle '(charset, language, value)' tuples: all values must be
@@ -308,7 +312,7 @@ class ResponseHeaders(BaseResponseHeaders):
 
     def __str__(self):
         """Returns the formatted headers ready for HTTP transmission."""
-        return '\r\n'.join(['%s: %s' % kv for kv in self.items()] + ['', ''])
+        return '\r\n'.join(['%s: %s' % v for v in self.items()] + ['', ''])
 
 
 class Response(webob.Response):
@@ -331,16 +335,19 @@ class Response(webob.Response):
 
     #: Default charset as in webapp.
     default_charset = 'utf-8'
-    #: A reference to the Response instance itself, for compatibility with
-    #: webapp only: webapp uses `Response.out.write()`, so we point `out` to
-    #: `self` and it will use `Response.write()`.
-    out = None
 
     def __init__(self, *args, **kwargs):
         """Constructs a response with the default settings."""
         super(Response, self).__init__(*args, **kwargs)
-        self.out = self
         self.headers['Cache-Control'] = 'no-cache'
+
+    @property
+    def out(self):
+        """A reference to the Response instance itself, for compatibility with
+        webapp only: webapp uses `Response.out.write()`, so we point `out` to
+        `self` and it will use `Response.write()`.
+        """
+        return self
 
     def write(self, text):
         """Appends a text to the response body."""
@@ -624,7 +631,8 @@ class RedirectHandler(RequestHandler):
 
         app = WSGIApplication([
             Route('/old-url', RedirectHandler, defaults={'_uri': '/new-url'}),
-            Route('/other-old-url', RedirectHandler, defaults={'_uri': get_redirect_url}),
+            Route('/other-old-url', RedirectHandler, defaults={
+                  '_uri': get_redirect_url}),
         ])
 
     Based on idea from `Tornado`_.
@@ -875,8 +883,10 @@ class Route(BaseRoute):
             If only the name is set, it will match anything except a slash.
             So these routes are equivalent::
 
-                Route('/<user_id>/settings', handler=SettingsHandler, name='user-settings')
-                Route('/<user_id:[^/]+>/settings', handler=SettingsHandler, name='user-settings')
+                Route('/<user_id>/settings', handler=SettingsHandler,
+                      name='user-settings')
+                Route('/<user_id:[^/]+>/settings', handler=SettingsHandler,
+                      name='user-settings')
 
             .. note::
                The handler only receives ``*args`` if no named variables are
@@ -1075,7 +1085,7 @@ class Webapp2HandlerAdapter(BaseHandlerAdapter):
 class Router(object):
     """A URI router used to match, dispatch and build URIs."""
 
-    #: Class used when the route is a tuple, for compatibility with webapp.
+    #: Class used when the route is set as a tuple.
     route_class = SimpleRoute
     #: All routes that can be matched.
     match_routes = None
@@ -1088,12 +1098,12 @@ class Router(object):
         """Initializes the router.
 
         :param routes:
-            A list of :class:`Route` instances. For compatibility with webapp,
-            the list items can also be a tuple ``(regex, handler_class)``.
+            A sequence of :class:`Route` instances or, for simple routes,
+            tuples ``(regex, handler)``.
         """
-        self.handlers = {}
         self.match_routes = []
         self.build_routes = {}
+        self.handlers = {}
         if routes:
             for route in routes:
                 self.add(route)
@@ -1102,11 +1112,11 @@ class Router(object):
         """Adds a route to this router.
 
         :param route:
-            A :class:`Route` instance or, for compatibility with webapp, a
-            tuple ``(regex, handler_class)``.
+            A :class:`Route` instance or, for simple routes, a tuple
+            ``(regex, handler)``.
         """
         if isinstance(route, tuple):
-            # Exceptional compatibility case: route compatible with webapp.
+            # Exceptional case: simple routes defined as a tuple.
             route = self.route_class(*route)
 
         for r in route.get_match_routes():
@@ -1251,25 +1261,25 @@ class Router(object):
         """Adapts a handler for dispatching.
 
         Because handlers use or implement different dispatching mechanisms,
-        they can be wrapped to use the unified API for routing or dispatching.
+        they can be wrapped to use a unified API for dispatching.
         This way webapp2 can support, for example, a :class:`RequestHandler`
         class and function views or, for compatibility purposes, a
-        ``webapp.RequestHandler`` class. They are dispatched differently by the
-        adapters but use the same router API.
+        ``webapp.RequestHandler`` class. The adapters follow the same router
+        dispatching API but dispatch each handler type differently.
 
         :param handler:
             A handler callable.
         :returns:
             A wrapped handler callable.
         """
-        try:
-            if issubclass(handler, webapp.RequestHandler):
+        if inspect.isclass(handler):
+            if _webapp and issubclass(handler, _webapp.RequestHandler):
                 # Compatible with webapp.RequestHandler.
                 adapter = WebappHandlerAdapter
             else:
                 # Default, compatible with webapp2.RequestHandler.
                 adapter = Webapp2HandlerAdapter
-        except TypeError:
+        else:
             # A "view" function.
             adapter = BaseHandlerAdapter
 
@@ -1319,25 +1329,30 @@ class Config(dict):
             Exception, when a required key is not set or is None.
         """
         if key in self.loaded:
-            return self[key]
+            config = self[key]
+        else:
+            config = dict(default_values or ())
+            if key in self:
+                config.update(self[key])
 
-        config = dict(default_values or ())
-
-        if key in self:
-            config.update(self[key])
+            self[key] = config
+            self.loaded.append(key)
+            if required_keys and not user_values:
+                self._validate_required(key, config, required_keys)
 
         if user_values:
+            config = config.copy()
             config.update(user_values)
+            if required_keys:
+                self._validate_required(key, config, required_keys)
 
-        if required_keys:
-            missing = [k for k in required_keys if config.get(k) is None]
-            if missing:
-                raise Exception(
-                    'Missing configuration keys for %r: %r.' % (key, missing))
-
-        self[key] = config
-        self.loaded.append(key)
         return config
+
+    def _validate_required(self, key, config, required_keys):
+        missing = [k for k in required_keys if config.get(k) is None]
+        if missing:
+            raise Exception(
+                'Missing configuration keys for %r: %r.' % (key, missing))
 
 
 class RequestContext(object):
@@ -1429,8 +1444,8 @@ class WSGIApplication(object):
         """Initializes the WSGI application.
 
         :param routes:
-            A list of :class:`Route` instances. For compatibility with webapp,
-            the list items can also be a tuple ``(regex, handler_class)``.
+            A sequence of :class:`Route` instances or, for simple routes,
+            tuples ``(regex, handler)``.
         :param debug:
             True to enable debug mode, False otherwise.
         :param config:
@@ -1452,26 +1467,26 @@ class WSGIApplication(object):
         be used in environments that don't support threading.
 
         If :mod:`webapp2_extras.local` is not available app and request will
-        be assigned directly as class attributes. This should only be used
-        in non-threaded environments (like App Engine Python 2.5).
+        be assigned directly as class attributes. This should only be used in
+        non-threaded environments (e.g., App Engine Python 2.5).
 
         :param app:
             A :class:`WSGIApplication` instance.
         :param request:
             A :class:`Request` instance.
         """
-        if local is not None: # pragma: no cover
+        if _local is not None:  # pragma: no cover
             _local.app = app
             _local.request = request
-        else: # pragma: no cover
+        else:  # pragma: no cover
             WSGIApplication.app = WSGIApplication.active_instance = app
             WSGIApplication.request = request
 
     def clear_globals(self):
         """Clears global variables. See :meth:`set_globals`."""
-        if local is not None: # pragma: no cover
+        if _local is not None:  # pragma: no cover
             _local.__release_local__()
-        else: # pragma: no cover
+        else:  # pragma: no cover
             WSGIApplication.app = WSGIApplication.active_instance = None
             WSGIApplication.request = None
 
@@ -1564,17 +1579,22 @@ class WSGIApplication(object):
     def run(self, bare=False):
         """Runs this WSGI-compliant application in a CGI environment.
 
-        This uses functions provided by ``google.appengine.ext.webapp.util``:
-        ``run_bare_wsgi_app`` and ``run_wsgi_app``.
+        This uses functions provided by ``google.appengine.ext.webapp.util``,
+        if available: ``run_bare_wsgi_app`` and ``run_wsgi_app``.
+
+        Otherwise, it uses ``wsgiref.handlers.CGIHandler().run()``.
 
         :param bare:
             If True, doesn't add registered WSGI middleware: use
             ``run_bare_wsgi_app`` instead of ``run_wsgi_app``.
         """
-        if bare:
-            util.run_bare_wsgi_app(self)
-        else:
-            util.run_wsgi_app(self)
+        if _webapp_util:
+            if bare:
+                _webapp_util.run_bare_wsgi_app(self)
+            else:
+                _webapp_util.run_wsgi_app(self)
+        else:  # pragma: no cover
+            handlers.CGIHandler().run(self)
 
     def get_response(self, *args, **kwargs):
         """Creates a request and returns a response for this app.
@@ -1591,7 +1611,7 @@ class WSGIApplication(object):
 
             # Test the app, passing parameters to build a request.
             response = app.get_response('/')
-            assert response.status == '200 OK'
+            assert response.status_int == 200
             assert response.body == 'Hello, world!'
 
         :param args:
@@ -1604,12 +1624,67 @@ class WSGIApplication(object):
         return self.request_class.blank(*args, **kwargs).get_response(self)
 
 
+_import_string_error = """\
+import_string() failed for %r. Possible reasons are:
+
+- missing __init__.py in a package;
+- package or module path not included in sys.path;
+- duplicated package or module name taking precedence in sys.path;
+- missing module, class, function or variable;
+
+Original exception:
+
+%s: %s
+
+Debugged import:
+
+%s"""
+
+
+class ImportStringError(Exception):
+    """Provides information about a failed :func:`import_string` attempt."""
+
+    #: String in dotted notation that failed to be imported.
+    import_name = None
+    #: Wrapped exception.
+    exception = None
+
+    def __init__(self, import_name, exception):
+        self.import_name = import_name
+        self.exception = exception
+        msg = _import_string_error
+        name = ''
+        tracked = []
+        for part in import_name.split('.'):
+            name += (name and '.') + part
+            imported = import_string(name, silent=True)
+            if imported:
+                tracked.append((name, imported.__file__))
+            else:
+                track = ['- %r found in %r.' % rv for rv in tracked]
+                track.append('- %r not found.' % name)
+                msg = msg % (import_name, exception.__class__.__name__,
+                             str(exception), '\n'.join(track))
+                break
+
+        Exception.__init__(self, msg)
+
+
+_get_app_error = 'WSGIApplication global variable is not set.'
+_get_request_error = 'Request global variable is not set.'
+
+
 def get_app():
     """Returns the active app instance.
 
     :returns:
         A :class:`WSGIApplication` instance.
     """
+    if _local:
+        assert getattr(_local, 'app', None) is not None, _get_app_error
+    else:
+        assert WSGIApplication.app is not None, _get_app_error
+
     return WSGIApplication.app
 
 
@@ -1619,6 +1694,11 @@ def get_request():
     :returns:
         A :class:`Request` instance.
     """
+    if _local:
+        assert getattr(_local, 'request', None) is not None, _get_request_error
+    else:
+        assert WSGIApplication.request is not None, _get_request_error
+
     return WSGIApplication.request
 
 
@@ -1735,7 +1815,7 @@ def import_string(import_name, silent=False):
     Simplified version of the function with same name from `Werkzeug`_.
 
     :param import_name:
-        The dotted name for the object to import.
+        String in dotted notation of the object to be imported.
     :param silent:
         If True, import or attribute errors are ignored and None is returned
         instead of raising an exception.
@@ -1749,9 +1829,9 @@ def import_string(import_name, silent=False):
             return getattr(__import__(module, None, None, [obj]), obj)
         else:
             return __import__(import_name)
-    except (ImportError, AttributeError):
+    except (ImportError, AttributeError), e:
         if not silent:
-            raise
+            raise ImportStringError(import_name, e), None, sys.exc_info()[2]
 
 
 def _urlunsplit(scheme=None, netloc=None, path=None, query=None,
@@ -1827,7 +1907,7 @@ def _parse_route_template(template, default_sufix=''):
     variables = {}
     reverse_template = pattern = ''
     args_count = last = 0
-    for match in _ROUTE_REGEX.finditer(template):
+    for match in _route_re.finditer(template):
         part = template[last:match.start()]
         name = match.group(1)
         expr = match.group(2) or default_sufix
@@ -1862,14 +1942,16 @@ def _get_route_variables(match, default_kwargs=None):
     return args, kwargs
 
 
+def _set_thread_safe_app():
+    """Assigns WSGIApplication globals to a proxy pointing to thread-local."""
+    if _local is not None:  # pragma: no cover
+        WSGIApplication.app = WSGIApplication.active_instance = _local('app')
+        WSGIApplication.request = _local('request')
+
+
 Request.ResponseClass = Response
 Response.RequestClass = Request
 # Alias.
 _abort = abort
 # Thread-safety support.
-if local is not None: # pragma: no cover
-    # Thread-local variables container.
-    _local = local.Local()
-    # Assign the class attributes to a proxy object that points to _local.
-    WSGIApplication.app = WSGIApplication.active_instance = _local('app')
-    WSGIApplication.request = _local('request')
+_set_thread_safe_app()
