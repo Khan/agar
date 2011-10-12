@@ -77,6 +77,21 @@ class Webapp2ExtrasSessionsConfig(Config):
 #: The `google.appengine.api.lib_config`_ ``ConfigHandle`` for ``webapp2_extras_sessions`` settings.
 config = Webapp2ExtrasSessionsConfig.get_config()
 
+
+class SessionStore(sessions.SessionStore):
+    """
+    A `webapp2.sessions.SessionStore`_ implementation that uses :py:class:`~agar.sessions.Webapp2ExtrasSessionsConfig`
+    instead of the built-in webapp2 config library.
+    """
+    def __init__(self, request):
+        """Initializes the session store.
+
+        :param request:
+            A :class:`webapp2.Request` instance.
+        """
+        super(SessionStore, self).__init__(request, config=Webapp2ExtrasSessionsConfig.get_webapp2_config())
+
+
 class SessionRequestHandler(RequestHandler):
     """
     A `webapp2.RequestHandler`_ implementation that provides access to a session via the ``session`` attribute..
@@ -90,7 +105,7 @@ class SessionRequestHandler(RequestHandler):
         method correspondent to the request method (``get()``, ``post()`` etc).
         """
         # Get a session store for this request.
-        self.session_store = sessions.get_store(request=self.request)
+        self.session_store = sessions.get_store(factory=SessionStore, request=self.request)
 
         try:
             # Dispatch the request.
