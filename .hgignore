@@ -1,5 +1,16 @@
 syntax: glob
 
 *.pyc
+*.pyo
+*.class
 .DS_Store
+*.o
+*.lo
+*.la
+*~
+*.swp
+*.swo
+*.sav
 *.orig
+.idea/*
+.hgcheck/*
