@@ -89,7 +89,7 @@ class SessionStore(sessions.SessionStore):
         :param request:
             A :class:`webapp2.Request` instance.
         """
-        super(SessionStore, self).__init__(request, config=Webapp2ExtrasSessionsConfig.get_webapp2_config())
+        super(SessionStore, self).__init__(request, config=Webapp2ExtrasSessionsConfig.get_config_as_dict())
 
 
 class SessionRequestHandler(RequestHandler):
