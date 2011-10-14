@@ -27,6 +27,8 @@ class BaseTest(unittest2.TestCase):
     """
 
     def setUp(self):
+        os.environ['HTTP_HOST'] = 'localhost'
+
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         
