@@ -24,6 +24,9 @@ class WebTest(TestCase):
     def post(self, url, params='', headers=None, extra_environ=None, upload_files=None):
         return self.app.post(url, params, headers=headers, status="*", expect_errors=True, upload_files=upload_files)
 
+    def delete(self, url, headers=None, extra_environ=None):
+        return self.app.delete(url, headers=headers, status="*", expect_errors=True)
+
     def assertOK(self, response):
         self.assertEqual(200, response.status_int)
 
