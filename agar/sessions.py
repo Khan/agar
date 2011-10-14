@@ -80,7 +80,7 @@ config = Webapp2ExtrasSessionsConfig.get_config()
 
 class SessionStore(sessions.SessionStore):
     """
-    A `webapp2.sessions.SessionStore`_ implementation that uses :py:class:`~agar.sessions.Webapp2ExtrasSessionsConfig`
+    A `webapp2_extras.sessions.SessionStore`_ implementation that uses :py:class:`~agar.sessions.Webapp2ExtrasSessionsConfig`
     instead of the built-in webapp2 config library.
     """
     def __init__(self, request):
