@@ -40,24 +40,7 @@ class AuthConfig(Config):
 #: The configuration object for ``agar.auth`` settings.
 config = AuthConfig.get_config()
 
-def https_authenticate(request):
-    """
-    An authenticate function for use with the :py:func:`~agar.auth.https_authentication_required` decorator. Enforces that a request
-    was made via HTTPS.  If it was a secure request, it will defer to the config function :py:meth:`~agar.auth.AuthConfig.authenticate`.
-    If not, it will return ``None``.
-
-    :param request: The `webapp2.Request`_ object to authenticate.
-    :return: A non-``None`` value if the request was made via HTTPS and can be authenticated. If the request was not made
-        via HTTPS or can not be authenticated, ``None``.
-    """
-    import urlparse
-    from agar.env import on_server
-    scheme, netloc, path, query, fragment = urlparse.urlsplit(request.url)
-    if on_server and scheme and scheme.lower() != 'https':
-        return None
-    return config.authenticate(request)
-
-def authentication_required(authenticate=None):
+def authentication_required(authenticate=None, require_https=False):
     """
     A decorator to authenticate a `RequestHandler <http://webapp-improved.appspot.com/api.html#webapp2.RequestHandler>`_.
     If the authenticate function returns a non-``None`` value, it will assign it to the request ``user`` attribute
@@ -69,12 +52,20 @@ def authentication_required(authenticate=None):
         can not be authenticated, the function should return ``None``. The type of the returned value can be anything,
         but it should be a type that your `webapp2.RequestHandler`_ expects.
         If ``None``, the config function :py:meth:`~agar.auth.AuthConfig.authenticate` will be used.
+    :param require_https: If ``True``, this will enforce that a request was made via HTTPS, otherwise a ``403`` response
+        will be returned.
     """
     if authenticate is None:
         authenticate = config.authenticate
     def decorator(request_method):
         @wraps(request_method)
         def wrapped(self, *args, **kwargs):
+            if require_https:
+                import urlparse
+                from agar.env import on_server
+                scheme, netloc, path, query, fragment = urlparse.urlsplit(self.request.url)
+                if on_server and scheme and scheme.lower() != 'https':
+                    self.abort(403)
             authentication = authenticate(self.request)
             if authentication is not None:
                 setattr(self.request, config.AUTHENTICATION_PROPERTY, authentication)
@@ -84,9 +75,9 @@ def authentication_required(authenticate=None):
         return wrapped
     return decorator
 
-def https_authentication_required():
+def https_authentication_required(authenticate=None):
     """
     A decorator to authenticate a secure request to a `webapp2.RequestHandler`_.
     This decorator uses the :py:func:`~agar.auth.https_authenticate` authenticate function.
     """
-    return authentication_required(authenticate=https_authenticate)
+    return authentication_required(authenticate=authenticate, require_https=True)
