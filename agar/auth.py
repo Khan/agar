@@ -78,6 +78,5 @@ def authentication_required(authenticate=None, require_https=False):
 def https_authentication_required(authenticate=None):
     """
     A decorator to authenticate a secure request to a `webapp2.RequestHandler`_.
-    This decorator uses the :py:func:`~agar.auth.https_authenticate` authenticate function.
     """
     return authentication_required(authenticate=authenticate, require_https=True)
