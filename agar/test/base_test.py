@@ -80,3 +80,16 @@ class BaseTest(unittest2.TestCase):
     
     def assertEmpty(self, iterable):
         self.assertLength(0, iterable)
+
+    def assertTasksInQueue(self, n=None, url=None, name=None, queue_names=None):
+        tasks = self.get_tasks(url=url, name=name, queue_names=queue_names)
+
+        self.assertEqual(n or 0, len(tasks))
+    
+    def get_tasks(self, url=None, name=None, queue_names=None):
+        return self.testbed.get_stub('taskqueue').get_filtered_tasks(url=url, name=name, queue_names=queue_names)
+
+
+    
+        
+
