@@ -45,5 +45,6 @@ class WebTest(TestCase):
     def assertNotFound(self, response):
         self.assertEqual(404, response.status_int)
 
-        
+    def assertUnauthorized(self, response):
+        self.assertEqual(401, response.status_int)
     

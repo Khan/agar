@@ -1,6 +1,8 @@
+from webob import Request
 from agar.test import BaseTest, WebTest
 
-import main 
+import main
+
 
 class TestWebTest(BaseTest, WebTest):
 
@@ -13,4 +15,10 @@ class TestWebTest(BaseTest, WebTest):
     def test_delete(self):
         response = self.delete("/")
         self.assertEqual(405, response.status_int)
+
+    def test_assertUnauthorized(self):
+        request = Request.blank("/")
+        request.status_int = 401
+
+        self.assertUnauthorized(request)
 
