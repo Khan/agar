@@ -26,32 +26,34 @@ class AuthConfig(Config):
     
     def authenticate(request):
         """
-        The authenticate function. It takes a single `webapp2.Request`_ argument, and returns a non-``None`` value if
-        the request can be authenticated. If the request can not be authenticated, the function should return ``None``.
-        The type of the returned value can be anything, but it should be a type that your `webapp2.RequestHandler`_ expects.
-        The default implementation always returns ``None``.
+        The authenticate function. It takes a single `webapp2.Request`_ argument, and returns a value representing the
+        authentication or the function can call `webapp2.abort`_ to short circuit the decorated handler. The type of
+        the returned value can be anything, but it should be a type that your `webapp2.RequestHandler`_ expects.
+        The default implementation always calls `webapp2.abort`_ with a status code of ``403``.
 
         :param request: The `webapp2.Request`_ object to authenticate.
-        :return: A non-``None`` value if the request can be authenticated. If the request can not be authenticated, the
-            function should return ``None``.
+        :return: The result of the authentication.
         """
-        return None
+        from webapp2 import abort
+        abort(403)
 
 #: The configuration object for ``agar.auth`` settings.
 config = AuthConfig.get_config()
 
 def authentication_required(authenticate=None, require_https=False):
     """
-    A decorator to authenticate a `RequestHandler <http://webapp-improved.appspot.com/api.html#webapp2.RequestHandler>`_.
-    If the authenticate function returns a non-``None`` value, it will assign it to the request ``user`` attribute
-    (or any re-configured name), that is passed to the decorated handler. If the authenticate function returns ``None``,
-    it will call the `webapp2.RequestHandler.abort`_ method with a status of ``403``.
+    A decorator to authenticate a `webapp2.RequestHandler`_.
+    The decorator will assign the return value from the ``authenticate`` function to the request ``user`` attribute
+    (or any re-configured name via the config :py:attr:`~agar.auth.AuthConfig.AUTHENTICATION_PROPERTY`), that is
+    passed to the decorated handler. The ``authenticate`` function can call `webapp2.abort`_ if there was a problem
+    authenticating the call.
 
-    :param authenticate: The authenticate function to use to authenticate a request. The function should take a single
-        `webapp2.Request`_ argument, and return a non-``None`` value if the request can be authenticated. If the request
-        can not be authenticated, the function should return ``None``. The type of the returned value can be anything,
-        but it should be a type that your `webapp2.RequestHandler`_ expects.
-        If ``None``, the config function :py:meth:`~agar.auth.AuthConfig.authenticate` will be used.
+    :param authenticate: The authentication function to use to authenticate a request. The function should take a single
+        `webapp2.Request`_ argument, and return a value representing the authentication.
+        The type of the returned value can be anything, but it should be a type that your
+        `webapp2.RequestHandler`_ expects. If ``None``, the configured function
+        :py:meth:`~agar.auth.AuthConfig.authenticate` will be used. If there is a problem authenticating the call, the
+        function can call `webapp2.abort`_ to short circuit the decorated handler.
     :param require_https: If ``True``, this will enforce that a request was made via HTTPS, otherwise a ``403`` response
         will be returned.
     """
@@ -66,12 +68,8 @@ def authentication_required(authenticate=None, require_https=False):
                 scheme, netloc, path, query, fragment = urlparse.urlsplit(self.request.url)
                 if on_server and scheme and scheme.lower() != 'https':
                     self.abort(403)
-            authentication = authenticate(self.request)
-            if authentication is not None:
-                setattr(self.request, config.AUTHENTICATION_PROPERTY, authentication)
-                request_method(self, *args, **kwargs)
-            else:
-                self.abort(403)
+            setattr(self.request, config.AUTHENTICATION_PROPERTY, authenticate(self.request))
+            request_method(self, *args, **kwargs)
         return wrapped
     return decorator
 

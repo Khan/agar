@@ -142,6 +142,8 @@ agar.url
 .. _webapp2.RequestHandler: http://webapp-improved.appspot.com/api/webapp2.html#webapp2.RequestHandler
 .. _webapp2.RequestHandler.abort: http://webapp-improved.appspot.com/api/webapp2.html#webapp2.RequestHandler.abort
 .. _webapp2.uri_for: http://webapp-improved.appspot.com/api/webapp2.html#webapp2.uri_for
+.. _webapp2.abort: http://webapp-improved.appspot.com/api/webapp2.html#webapp2.abort
+
 .. _uuid4: http://docs.python.org/library/uuid.html#uuid.uuid4
 
 .. _mime type: http://en.wikipedia.org/wiki/Internet_media_type
