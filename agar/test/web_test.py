@@ -4,11 +4,24 @@ from unittest2 import TestCase
 class WebTest(TestCase):
     """
     A base class for testing web requests. Provides a wrapper around
-    the webtest package that is compatable with gaetestbed's.
+    the `WebTest`_ package that is mostly compatable with gaetestbed's.
 
-    To use, inherit from the WebTest class and define a class-level
+    To use, inherit from the `WebTest`_ class and define a class-level
     variable called APPLICATION that is set to the WSGI application
     under test.
+
+    WebTest is usually used in conjuction with BaseTest to set up the
+    App Engine API proxy stubs.
+
+    Example::
+
+       class TestMyApp(BaseTest, WebTest):
+
+           APPLICATION = my_app.application
+
+           def test_get_home_page(self):
+               response = self.get("/")
+               self.assertOK(response)
     """
 
     @property
@@ -28,9 +41,17 @@ class WebTest(TestCase):
         return self.app.delete(url, headers=headers, status="*", expect_errors=True)
 
     def assertOK(self, response):
+        """
+        Assert that ``response`` was 200 OK.
+        """
         self.assertEqual(200, response.status_int)
 
     def assertRedirects(self, response, to=None):
+        """
+        Assert that ``response`` was a 302 redirect.
+
+        :param to: an absolute or relative URL that the redirect must match.
+        """
         self.assertEqual(302, response.status_int)
         
         if to:
@@ -40,11 +61,20 @@ class WebTest(TestCase):
             self.assertEqual(response.headers['Location'], to)
 
     def assertForbidden(self, response):
+        """
+        Assert that ``response`` was 403 Forbidden.
+        """
         self.assertEqual(403, response.status_int)
 
     def assertNotFound(self, response):
+        """
+        Assert that ``response`` was 404 Not Found.
+        """
         self.assertEqual(404, response.status_int)
 
     def assertUnauthorized(self, response):
+        """
+        Assert that ``response`` was 401 Not Found.
+        """
         self.assertEqual(401, response.status_int)
     
