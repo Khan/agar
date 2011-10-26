@@ -7,14 +7,16 @@ from google.appengine.ext import testbed
 class BaseTest(unittest2.TestCase):
     """
     A base class for App Engine unit tests that sets up API proxy
-    stubs for all available services, using testbed and clears them
+    stubs for all available services using `testbed`_ and clears them
     between each test run.
 
-    Note: the images stub is only set up if PIL is found.
+    Note: the `images`_ stub is only set up if `PIL`_ is found.
 
-    To use, simply inherit from ``BaseTest``:
+    To use, simply inherit from ``BaseTest``::
 
         import agar
+
+        from models import MyModel
         
         class MyTestCase(agar.test.BaseTest):
             
@@ -26,7 +28,10 @@ class BaseTest(unittest2.TestCase):
                 # between test method runs.
                 self.assertEqual(1, MyModel.all().count())
 
-    ``BaseTest`` is designed to be mostly API-compatable with gaetestbed's assertions.
+    :py:class:`BaseTest` is designed to be mostly API-compatable with
+    `gaetestbed`_'s assertions. However, unlike `gaetestbed`_, the assertions are split
+    into only two classes: :py:class:`BaseTest` and
+    :py:class:`WebTest`.
     """
 
     def setUp(self):
@@ -57,9 +62,9 @@ class BaseTest(unittest2.TestCase):
     def log_in_user(self, email):
         """
         Log in a `User`_ with the given email address. This will cause
-        ``google.appengine.api.users.get_current_user()`` to return a
-        `User`_ with the same email address and user_id as if it was
-        entered into the SDK's log in prompt.
+        `users.get_current_user`_ to return a `User`_ with the same
+        email address and user_id as if it was entered into the SDK's
+        log in prompt.
         """
         # stolen from dev_appserver_login
         user_id_digest = hashlib.md5(email.lower()).digest()
@@ -130,7 +135,7 @@ class BaseTest(unittest2.TestCase):
 
         NOTE: This assertion uses the standard xUnit (expected,
         actual) order for parameters. However, this is the reverse of
-        gaetestbed.
+        `gaetestbed`_.
 
         :param exepcted: an integer representing the expected lenght
         :param iterable: an iterable which will be converted to a list.
@@ -149,7 +154,7 @@ class BaseTest(unittest2.TestCase):
 
     def assertTasksInQueue(self, n=None, url=None, name=None, queue_names=None):
         """
-        Search for `Task`_s matching the given criteria and assert that their are ``n`` tasks.
+        Search for `Task`_ objects matching the given criteria and assert that there are ``n`` tasks.
 
         Example::
 

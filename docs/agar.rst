@@ -100,6 +100,21 @@ agar.templatetags
 .. autodata:: agar.templatetags.webapp2.url_for
 .. autodata:: agar.templatetags.webapp2.on_production_server
 
+---------
+agar.test
+---------
+
+.. automodule:: agar.test
+
+.. autoclass:: agar.test.BaseTest
+    :members:
+
+.. autoclass:: agar.test.MockUrlfetchTest
+    :members:
+
+.. autoclass:: agar.test.WebTest
+    :members:
+
 --------
 agar.url
 --------
@@ -127,6 +142,7 @@ agar.url
 .. _Image.height: http://code.google.com/appengine/docs/python/images/imageclass.html#Image_height
 .. _Image.get_serving_url: http://code.google.com/appengine/docs/python/images/functions.html#Image_get_serving_url
 .. _google.appengine.api.lib_config: http://code.google.com/p/googleappengine/source/browse/trunk/python/google/appengine/api/lib_config.py
+.. _users.get_current_user: http://code.google.com/appengine/docs/python/users/functions.html
 
 .. _django: http://www.djangoproject.com/
 .. _django forms: https://docs.djangoproject.com/en/dev/topics/forms/
@@ -149,3 +165,12 @@ agar.url
 .. _uuid4: http://docs.python.org/library/uuid.html#uuid.uuid4
 
 .. _mime type: http://en.wikipedia.org/wiki/Internet_media_type
+
+.. _WebTest: http://webtest.pythonpaste.org/
+.. _gaetestbed: https://github.com/jgeewax/gaetestbed
+.. _testbed: http://code.google.com/appengine/docs/python/tools/localunittesting.html
+.. _images: http://code.google.com/appengine/docs/python/images/
+.. _PIL: http://www.pythonware.com/products/pil/
+.. _urlfetch: http://code.google.com/appengine/docs/python/urlfetch/
+.. _Task: http://code.google.com/appengine/docs/python/taskqueue/tasks.html#Task
+.. _User: http://code.google.com/appengine/docs/python/users/userclass.html

@@ -45,14 +45,14 @@ class MockURLFetchServiceStub(apiproxy_stub.APIProxyStub):
 
 class MockUrlfetchTest(BaseTest):
     """
-    MockUrlfetchTest replaces the ``urlfetch`` API stub with a mocked
+    :py:class:`MockUrlfetchTest` replaces the `urlfetch`_ API stub with a mocked
     version that does not make real HTTP requests.
 
-    To use it, inherit from ``MockUrlfetchTest`` instead of
+    To use it, inherit from :py:class:`MockUrlfetchTest` instead of
     :py:class:`BaseTest`, then register HTTP responses in your
     ``setUp`` method, or individual test case methods.
 
-    If any of the code under test results in ``urlfetch`` call to an
+    If any of the code under test results in `urlfetch`_ call to an
     unregistered URL, it will raise an exception.
 
     Example::
@@ -87,9 +87,9 @@ class MockUrlfetchTest(BaseTest):
         """
         Register an HTTP response for ``url`` with body containing ``content``.
 
-        :params url: the URL for the HTTP request
-        :params content: the HTTP response's body
-        :params status_code: the expected status code. Defaults to 200 if not set.
-        :params headers: a ``dict`` of headers for the HTTP response.
+        :param url: the URL for the HTTP request
+        :param content: the HTTP response's body
+        :param status_code: the expected status code. Defaults to 200 if not set.
+        :param headers: a ``dict`` of headers for the HTTP response.
         """
         MockURLFetchServiceStub.set_response(url, content, status_code, headers)
