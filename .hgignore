@@ -14,3 +14,4 @@ syntax: glob
 *.orig
 .idea/*
 .hgcheck/*
+docs/_build/*
