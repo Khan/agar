@@ -16,24 +16,6 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
-#sys.path.insert(0, os.path.abspath('./..'))
-#sys.path.insert(0, os.path.abspath('./../lib'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/antlr3'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/django_0_96'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/fancy_urllib'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/ipaddr'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/webob'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/yaml/lib'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/simplejson'))
-#sys.path.insert(0, os.path.abspath('/usr/local/google_appengine/lib/graphy'))
-#
-#from google.appengine.dist import use_library
-#os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-#use_library('django', '1.2')
-
-
 gae_path = '/usr/local/google_appengine'
 
 current_path = os.path.abspath('.')
