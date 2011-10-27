@@ -34,13 +34,16 @@ class WebTest(TestCase):
 
         return self._web_test_app
             
-    def get(self, url, params=None, headers=None, extra_environ=None):
+    def get(self, url, params=None, headers=None):
         return self.app.get(url, params=params, headers=headers, status="*", expect_errors=True)
 
-    def post(self, url, params='', headers=None, extra_environ=None, upload_files=None):
+    def post(self, url, params='', headers=None, upload_files=None):
         return self.app.post(url, params, headers=headers, status="*", expect_errors=True, upload_files=upload_files)
 
-    def delete(self, url, headers=None, extra_environ=None):
+    def put(self, url, params='', headers=None, upload_files=None):
+        return self.app.put(url, params, headers=headers, status="*", expect_errors=True, upload_files=upload_files)
+
+    def delete(self, url, headers=None):
         return self.app.delete(url, headers=headers, status="*", expect_errors=True)
 
     def assertOK(self, response):

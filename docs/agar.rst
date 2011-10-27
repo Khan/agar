@@ -115,6 +115,9 @@ agar.test
 .. autoclass:: agar.test.WebTest
     :members:
 
+.. autoclass:: agar.test.DataStoreTest
+    :members:
+
 --------
 agar.url
 --------
