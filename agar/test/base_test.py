@@ -2,7 +2,6 @@ import os
 import hashlib
 import unittest2
 from google.appengine.api import users
-from google.appengine.api import apiproxy_stub_map
 from google.appengine.ext import testbed
 
 
@@ -83,8 +82,7 @@ class BaseTest(unittest2.TestCase):
                     self.clear_datastore()
                     self.assertLength(models.MyModel.all(), 0)
         """
-        datastore_stub = apiproxy_stub_map.apiproxy._APIProxyStubMap__stub_map['datastore_v3']
-        datastore_stub.Clear()
+        self.testbed.get_stub('datastore_v3').Clear()
 
     def log_in_user(self, email):
         """
@@ -164,7 +162,7 @@ class BaseTest(unittest2.TestCase):
         actual) order for parameters. However, this is the reverse of
         `gaetestbed`_.
 
-        :param exepcted: an integer representing the expected lenght
+        :param expected: an integer representing the expected length
         :param iterable: an iterable which will be converted to a list.
         :param message: optional message for assertion.
         """
