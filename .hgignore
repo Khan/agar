@@ -15,3 +15,6 @@ syntax: glob
 .idea/*
 .hgcheck/*
 docs/_build/*
+build/*
+*.egg-info
+dist/*
