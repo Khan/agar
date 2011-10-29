@@ -1,6 +1,7 @@
 import os
 import hashlib
 import unittest2
+from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.ext import testbed
 
@@ -205,3 +206,20 @@ class BaseTest(unittest2.TestCase):
 
         """
         return self.testbed.get_stub('taskqueue').get_filtered_tasks(url=url, name=name, queue_names=queue_names)
+
+    def assertMemcacheHits(self, hits):
+        """
+        Asserts that the memcache API has had ``hits`` successful lookups.
+
+        :param hits: number of memcache hits
+        """
+        self.assertEqual(hits, memcache.get_stats()['hits'])
+
+    def assertMemcacheItems(self, items):
+        """
+        Asserts that the memcache API has ``items`` key-value pairs.
+
+        :param items: number of items in memcache
+        """
+        self.assertEqual(items, memcache.get_stats()['items'])
+
