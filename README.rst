@@ -1,8 +1,7 @@
 agar
 ====
 
-Agar is a set of utilities for `Google App Engine python`_, extracted from
-numerous GAE projects.
+Agar is a set of utilities for `Google App Engine python`_, , created as part of the `Substrate Project`_.
 
 Resources
 ---------
@@ -54,6 +53,8 @@ To contribute to the Agar project, fork the repository, make your
 changes, and submit a pull request.
 
 .. Links
+
+.. _Substrate Project: http://pypi.python.org/pypi/substrate
 
 .. _Documentation: http://packages.python.org/agar
 .. _PyPI Package: http://pypi.python.org/pypi/agar
