@@ -1,6 +1,5 @@
 import urllib
 
-from unittest2 import TestCase
 from webapp2 import WSGIApplication
 from webtest import Request
 

@@ -49,6 +49,7 @@ class BaseTest(unittest2.TestCase):
         self.testbed.init_user_stub()
         self.testbed.init_xmpp_stub()
         self.testbed.init_mail_stub()
+        self.testbed.init_blobstore_stub()
 
         try:
             from google.appengine.api.images import images_stub

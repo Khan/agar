@@ -129,7 +129,7 @@ class Image(db.Model):
         serving_url = None
         if self.blob_key is not None:
             namespace = "agar-image-serving-url"
-            key = "%s-%s-%s" % (self.key().name(), size, crop)
+            key = "%s-%s-%s" % (self.key(), size, crop)
             #noinspection PyArgumentList
             serving_url = memcache.get(key, namespace=namespace)
             if serving_url is None:
