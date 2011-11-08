@@ -20,6 +20,14 @@ Changes
 
     * Updated `DEFAULT_AUTHENTICATE_FUNCTION`_ to retain ``403`` behavior out of the box.
 
+  * `agar.env`_
+
+    * Use `get_application_id()`_ instead of ``os.environ.get('APPLICATION_ID')``.
+
+  * `agar.image`_
+
+    * Fixed `get_serving_url()`_ caching bug.
+
   * `agar.test`_
 
     * Added `BaseTest.get_tasks()`_.
@@ -49,6 +57,12 @@ Changes
 
 .. _agar: http://packages.python.org/agar/agar.html
 .. _agar.auth: http://packages.python.org/agar/agar.html#module-agar.auth
+.. _agar.env: http://packages.python.org/agar/agar.html#module-agar.env
+.. _agar.image: http://packages.python.org/agar/agar.html#module-agar.image
+
+.. _get_application_id(): http://code.google.com/appengine/docs/python/appidentity/functions.html#get_application_id
+.. _get_serving_url(): http://packages.python.org/agar/agar.html#agar.image.Image.get_serving_url
+
 .. _agar.test: http://packages.python.org/agar/agar.html#module-agar.test
 .. _AuthConfig: http://packages.python.org/agar/agar.html#agar.auth.AuthConfig
 .. _authentication_required: http://packages.python.org/agar/agar.html#agar.auth.authentication_required
@@ -61,3 +75,4 @@ Changes
 .. _WebTest.assertUnauthorized(): http://packages.python.org/agar/agar.html#agar.test.WebTest.assertUnauthorized
 .. _WebTest.put(): http://packages.python.org/agar/agar.html#agar.test.WebTest.put
 .. _WebTest.delete(): http://packages.python.org/agar/agar.html#agar.test.WebTest.delete
+
