@@ -1,7 +1,7 @@
 Changes
 -------
 
-* **0.3dev** (Development Version) -- Not released
+* **0.4** -- 2011-11-08
 
   * `agar.auth`_
 
