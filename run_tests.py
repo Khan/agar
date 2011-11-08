@@ -46,7 +46,7 @@ from unittest2.main import main_
 config = matcher = None
 
 try:
-    config, matcher = dev_appserver.LoadAppConfig("tests/app", {})
+    config, matcher, from_cache = dev_appserver.LoadAppConfig("tests/app", {})
 except yaml_errors.EventListenerError, e:
     logging.error('Fatal error when loading application configuration:\n' + str(e))
 except dev_appserver.InvalidAppConfigError, e:
@@ -64,9 +64,7 @@ args[dev_appserver_main.ARG_PROSPECTIVE_SEARCH_PATH] = os.path.join(
 args[dev_appserver_main.ARG_HISTORY_PATH] = os.path.join(
         tempfile.gettempdir(), 'dev_appserver.test.datastore.history')
 
-from google.appengine.api import app_identity
 dev_appserver.SetupStubs(config.application, **args)
-os.environ['APPLICATION_ID'] = 'dev~%s' % app_identity.get_application_id()
 
 
 if __name__ == "__main__":
