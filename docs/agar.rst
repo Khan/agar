@@ -18,6 +18,23 @@ agar.config
 .. autoclass:: agar.config.Config
     :members: _prefix, get_config, get_config_as_dict
 
+------------
+agar.counter
+------------
+.. automodule:: agar.counter
+.. autoclass:: agar.counter.WriteBehindCounter()
+    :members:
+    :exclude-members: count
+.. autoclass:: agar.counter.TimedWriteBehindCounter()
+    :members:
+    :exclude-members: normalize_ts, get_ts_name, count, timestamp
+.. autoclass:: agar.counter.HourlyWriteBehindCounter()
+    :members: get_value, flush_counter, incr
+    :exclude-members: normalize_ts, get_ts_name, count, timestamp
+.. autoclass:: agar.counter.DailyWriteBehindCounter()
+    :members: get_value, flush_counter, incr
+    :exclude-members: normalize_ts, get_ts_name, count, timestamp
+
 ----------
 agar.dates
 ----------
