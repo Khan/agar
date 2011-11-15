@@ -78,9 +78,11 @@ class WebTest(TestCase):
         """
         self.assertEqual(404, response.status_int)
 
-    def assertUnauthorized(self, response):
+    def assertUnauthorized(self, response, challenge=None):
         """
         Assert that ``response`` was 401 Not Found.
         """
         self.assertEqual(401, response.status_int)
-    
+        if challenge:
+            self.assertEqual(challenge, response.headers['WWW-Authenticate'])
+        
