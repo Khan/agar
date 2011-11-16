@@ -22,3 +22,10 @@ class TestWebTest(BaseTest, WebTest):
 
         self.assertUnauthorized(request)
 
+    def test_assertUnauthorized_challenge(self):
+        request = Request.blank("/")
+        request.status_int = 401
+        request.headers['WWW-Authenticate'] = "hello world"
+
+        self.assertUnauthorized(request, challenge='hello world')
+

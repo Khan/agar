@@ -6,12 +6,12 @@ class WebTest(TestCase):
     A base class for testing web requests. Provides a wrapper around
     the `WebTest`_ package that is mostly compatable with `gaetestbed`_'s.
 
-    To use, inherit from the `WebTest`_ class and define a class-level
+    To use, inherit from :py:class:`WebTest` and define a class-level
     variable called ``APPLICATION`` that is set to the WSGI application
     under test.
 
-    py:class:`WebTest` is usually used in conjuction with
-    py:class:`BaseTest` to set up the App Engine API proxy stubs.
+    :py:class:`WebTest` is usually used in conjuction with
+    :py:class:`BaseTest` to set up the App Engine API proxy stubs.
 
     Example::
 
@@ -78,9 +78,11 @@ class WebTest(TestCase):
         """
         self.assertEqual(404, response.status_int)
 
-    def assertUnauthorized(self, response):
+    def assertUnauthorized(self, response, challenge=None):
         """
         Assert that ``response`` was 401 Not Found.
         """
         self.assertEqual(401, response.status_int)
-    
+        if challenge:
+            self.assertEqual(challenge, response.headers['WWW-Authenticate'])
+        
