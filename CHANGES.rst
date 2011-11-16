@@ -1,6 +1,18 @@
 Changes
 -------
 
+* **0.5** -- 2011-11-15
+
+  * `agar.test`_
+
+    * Added optional ``challenge`` parameter to `WebTest.assertUnauthorized()`_.
+
+  * `agar.django.templates`_
+
+    * Added `render_template_to_string()`_.
+
+  * Added `agar.counter`_.
+
 * **0.4** -- 2011-11-08
 
   * `agar.auth`_
@@ -59,6 +71,9 @@ Changes
 .. _agar.auth: http://packages.python.org/agar/agar.html#module-agar.auth
 .. _agar.env: http://packages.python.org/agar/agar.html#module-agar.env
 .. _agar.image: http://packages.python.org/agar/agar.html#module-agar.image
+.. _agar.counter: http://packages.python.org/agar/agar.html#module-agar.counter
+.. _agar.django.templates: http://packages.python.org/agar/agar.html#module-agar.django.templates
+.. _render_template_to_string(): http://packages.python.org/agar/agar.html#agar.django.templates.render_template_to_string
 
 .. _get_application_id(): http://code.google.com/appengine/docs/python/appidentity/functions.html#get_application_id
 .. _get_serving_url(): http://packages.python.org/agar/agar.html#agar.image.Image.get_serving_url
