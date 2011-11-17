@@ -10,6 +10,7 @@ from google.appengine.ext.webapp import template
 # Get the template Library
 register = template.create_template_register()
 
+
 class URLNode(Node):
     def __init__(self, route_name, args, kwargs, asvar):
         self.route_name = route_name
@@ -34,6 +35,7 @@ class URLNode(Node):
             return ''
         else:
             return url
+
 
 def uri_for(parser, token):
     """
@@ -90,3 +92,20 @@ def on_production_server():
     return on_production_server
 on_production_server = register.tag(on_production_server)
 
+
+class LogoutURLNode(Node):
+    def __init__(self, logout_url):
+        self.logout_url = logout_url
+
+    def render(self, context):
+        from google.appengine.api.users import create_logout_url
+        return create_logout_url(self.logout_url)
+
+
+def create_logout_url(parser, token):
+    try:
+        tag_name, dest_url = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
+    return LogoutURLNode(dest_url)
+create_logout_url = register.tag(create_logout_url)
