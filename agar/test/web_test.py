@@ -85,4 +85,10 @@ class WebTest(TestCase):
         self.assertEqual(401, response.status_int)
         if challenge:
             self.assertEqual(challenge, response.headers['WWW-Authenticate'])
+
+    def assertBadRequest(self, response):
+        """
+        Assert that ``response`` was 400 Bad Request.
+        """
+        self.assertEqual(400, response.status_int)
         

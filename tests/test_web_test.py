@@ -29,3 +29,9 @@ class TestWebTest(BaseTest, WebTest):
 
         self.assertUnauthorized(request, challenge='hello world')
 
+    def test_assertBadRequest(self):
+        request = Request.blank("/")
+        request.status_int = 400
+
+        self.assertBadRequest(request)
+
