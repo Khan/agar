@@ -58,6 +58,12 @@ agar.django.forms
 .. automodule:: agar.django.forms
     :members:
 
+^^^^^^^^^^^^^^^^^^^^^
+agar.django.templates
+^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: agar.django.templates
+    :members:
+
 --------
 agar.env
 --------
