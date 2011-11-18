@@ -80,7 +80,9 @@ class WebTest(TestCase):
 
     def assertUnauthorized(self, response, challenge=None):
         """
-        Assert that ``response`` was 401 Not Found.
+        Assert that ``response`` was 401 Unauthorized.
+
+        :param challenge: assert that the ``WWW-Authenticate`` header matches this value, if provided
         """
         self.assertEqual(401, response.status_int)
         if challenge:
