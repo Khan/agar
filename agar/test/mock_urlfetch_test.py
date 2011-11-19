@@ -119,12 +119,12 @@ class MockUrlfetchTest(BaseTest):
 
             # Will cause a DownloadError to be raised when the URL is requested:
             from google.appengine.api import urlfetch
-            self.set_response("http://example.com/boom", response=urlfetch.DownloadError("Something Failed"), status_code=500)
+            self.set_response("http://example.com/boom", response=urlfetch.DownloadError("Something Failed"))
 
         :param url: the URL for the HTTP request.
         :param content: the HTTP response's body, or an instance of DownloadError to simulate a failure.
         :param status_code: the expected status code. Defaults to 200 if not set.
         :param headers: a ``dict`` of headers for the HTTP response.
-        :params method: the method that the respons must match. If not set, all requests with the same URL will return the same thing.
+        :param method: the HTTP method that the response must match. If not set, all requests with the same URL will return the same thing.
         """
         MockURLFetchServiceStub.set_response(url, content=content, status_code=status_code, headers=headers, method=method)
