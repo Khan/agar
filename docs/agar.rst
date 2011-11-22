@@ -120,8 +120,11 @@ agar.sessions
 -----------------
 agar.templatetags
 -----------------
+.. automodule:: agar.templatetags
+
 .. autodata:: agar.templatetags.webapp2.url_for
 .. autodata:: agar.templatetags.webapp2.on_production_server
+.. autodata:: agar.templatetags.webapp2.create_logout_url
 
 ---------
 agar.test
@@ -168,9 +171,9 @@ agar.url
 .. _users.get_current_user: http://code.google.com/appengine/docs/python/users/functions.html
 
 .. _django: http://www.djangoproject.com/
-.. _django forms: https://docs.djangoproject.com/en/dev/topics/forms/
-.. _django form class: https://docs.djangoproject.com/en/1.3/ref/forms/api/#django.forms.Form
-.. _django template tags: https://docs.djangoproject.com/en/dev/howto/custom-template-tags/
+.. _django forms: http://docs.djangoproject.com/en/dev/topics/forms/
+.. _django form class: http://docs.djangoproject.com/en/1.3/ref/forms/api/#django.forms.Form
+.. _django template tags: http://docs.djangoproject.com/en/dev/howto/custom-template-tags/
 
 .. _webapp2: http://code.google.com/p/webapp-improved/
 .. _webapp2 configuration: http://webapp-improved.appspot.com/guide/app.html#guide-app-config
@@ -190,7 +193,7 @@ agar.url
 .. _mime type: http://en.wikipedia.org/wiki/Internet_media_type
 
 .. _WebTest: http://webtest.pythonpaste.org/
-.. _gaetestbed: https://github.com/jgeewax/gaetestbed
+.. _gaetestbed: http://github.com/jgeewax/gaetestbed
 .. _testbed: http://code.google.com/appengine/docs/python/tools/localunittesting.html
 .. _images: http://code.google.com/appengine/docs/python/images/
 .. _PIL: http://www.pythonware.com/products/pil/

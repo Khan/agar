@@ -103,6 +103,9 @@ class LogoutURLNode(Node):
 
 
 def create_logout_url(parser, token):
+    """
+    Inserts a Google Account logout url.
+    """
     try:
         tag_name, dest_url = token.split_contents()
     except ValueError:

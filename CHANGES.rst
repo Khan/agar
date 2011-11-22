@@ -1,6 +1,18 @@
 Changes
 -------
 
+* **0.5.1** -- 2011-11-22
+
+  * `agar.test`_
+
+    * Added `WebTest.assertBadRequest()`_
+
+    * Added optional ``method`` parameter to  `MockUrlfetchTest.set_response()`_
+
+  * `agar.templatetags`_
+
+    * Added `create_logout_url`_
+    
 * **0.5** -- 2011-11-15
 
   * `agar.test`_
@@ -72,8 +84,10 @@ Changes
 .. _agar.env: http://packages.python.org/agar/agar.html#module-agar.env
 .. _agar.image: http://packages.python.org/agar/agar.html#module-agar.image
 .. _agar.counter: http://packages.python.org/agar/agar.html#module-agar.counter
+.. _agar.templatetags: http://packages.python.org/agar/agar.html#module-agar.templatetags
 .. _agar.django.templates: http://packages.python.org/agar/agar.html#module-agar.django.templates
 .. _render_template_to_string(): http://packages.python.org/agar/agar.html#agar.django.templates.render_template_to_string
+.. _create_logout_url: http://packages.python.org/agar/agar.html#module-agar.templatetags.create_logout_url
 
 .. _get_application_id(): http://code.google.com/appengine/docs/python/appidentity/functions.html#get_application_id
 .. _get_serving_url(): http://packages.python.org/agar/agar.html#agar.image.Image.get_serving_url
@@ -88,6 +102,9 @@ Changes
 .. _BaseTest.get_tasks(): http://packages.python.org/agar/agar.html#agar.test.BaseTest.get_tasks
 .. _BaseTest.assertTasksInQueue(): http://packages.python.org/agar/agar.html#agar.test.BaseTest.assertTasksInQueue
 .. _WebTest.assertUnauthorized(): http://packages.python.org/agar/agar.html#agar.test.WebTest.assertUnauthorized
+.. _WebTest.assertBadRequest(): http://packages.python.org/agar/agar.html#agar.test.WebTest.assertBadRequest
 .. _WebTest.put(): http://packages.python.org/agar/agar.html#agar.test.WebTest.put
 .. _WebTest.delete(): http://packages.python.org/agar/agar.html#agar.test.WebTest.delete
+
+.. _MockUrlfetchTest.set_response(): http://packages.python.org/agar/agar.html#agar.test.MockUrlfetchTest.set_response
 
