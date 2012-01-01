@@ -37,7 +37,6 @@ class URLNode(Node):
 
 
 @register.tag(name='uri_for')
-@register.tag(name='url_for')
 def uri_for(parser, token):
     """
     Returns a URL matching given the route name with its parameters.
