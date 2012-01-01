@@ -1,6 +1,13 @@
 Changes
 -------
+* **0.6** -- 2012-01-01
 
+  * Removed alias for agar.url_for, use agar.uri_for
+
+  * Removed templatetag for url_for, use uri_for
+  
+  * Moved agar.templatetags.webapp2 to agar.django.templatetags
+  
 * **0.5.1** -- 2011-11-22
 
   * `agar.test`_
