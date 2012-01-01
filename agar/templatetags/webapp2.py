@@ -76,16 +76,13 @@ def uri_for(parser, token):
                         args.append(parser.compile_filter(arg))
     return URLNode(routename, args, kwargs, asvar)
 uri_for = register.tag(uri_for)
-# Alias.
-url_for = uri_for
-url_for = register.tag(url_for)
 
 
 def on_production_server():
     """
     Returns whether the code is running on a production server. See :py:func:`~agar.env.on_production_server` for
     more information.
-    
+
     :return: ``True`` if running on a production server, ``False`` otherwise.
     """
     from agar.env import on_production_server

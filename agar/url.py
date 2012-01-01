@@ -30,6 +30,7 @@ class UrlConfig(Config):
 #: The configuration object for ``agar.url`` settings.
 config = UrlConfig.get_config()
 
+
 def uri_for(name, *args, **kwargs):
     """
     A wrapper around the `webapp2.uri_for`_ function that will search all applications defined in the
@@ -51,7 +52,7 @@ def uri_for(name, *args, **kwargs):
             * **_scheme**: URI scheme, e.g., ``http`` or ``https``. If defined, an absolute URI is always returned.
             * **_netloc**: Network location, e.g., ``www.google.com``. If defined, an absolute URI is always returned.
             * **_fragment**: If set, appends a fragment (or "anchor") to the generated URI.
-            
+
     :return: An absolute or relative URI.
     """
     request = kwargs.pop('request', get_request())
@@ -77,5 +78,3 @@ def uri_for(name, *args, **kwargs):
     if uri is None and error is not None:
         raise error
     return uri
-# Alias.
-url_for = uri_for
