@@ -1,7 +1,8 @@
 from webapp2 import WSGIApplication
 from webtest import Request
-from agar.url import uri_for, url_for
+from agar.url import uri_for
 from agar.test import BaseTest
+
 
 class UriTest(BaseTest):
     def setUp(self):
@@ -20,8 +21,3 @@ class UriTest(BaseTest):
             self.fail("Got uri '%s' for invalid uri name '%s'" % (uri, invalid_uri_name))
         except Exception, e:
             self.assertEqual(e.message, "Route named '%s' is not defined." % invalid_uri_name)
-
-class UrlTest(UriTest):
-    def setUp(self):
-        self.method = url_for
-        super(UrlTest, self).setUp()

@@ -77,5 +77,3 @@ def uri_for(name, *args, **kwargs):
     if uri is None and error is not None:
         raise error
     return uri
-# Alias.
-url_for = uri_for
