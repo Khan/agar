@@ -6,7 +6,6 @@ from django.template import Node, TemplateSyntaxError
 
 from google.appengine.ext.webapp import template
 
-
 # Get the template Library
 register = template.create_template_register()
 
@@ -37,6 +36,8 @@ class URLNode(Node):
             return url
 
 
+@register.tag(name='uri_for')
+@register.tag(name='url_for')
 def uri_for(parser, token):
     """
     Returns a URL matching given the route name with its parameters.
@@ -75,22 +76,18 @@ def uri_for(parser, token):
                     elif arg:
                         args.append(parser.compile_filter(arg))
     return URLNode(routename, args, kwargs, asvar)
-uri_for = register.tag(uri_for)
-# Alias.
-url_for = uri_for
-url_for = register.tag(url_for)
 
 
+@register.tag(name='on_production_server')
 def on_production_server():
     """
     Returns whether the code is running on a production server. See :py:func:`~agar.env.on_production_server` for
     more information.
-    
+
     :return: ``True`` if running on a production server, ``False`` otherwise.
     """
     from agar.env import on_production_server
     return on_production_server
-on_production_server = register.tag(on_production_server)
 
 
 class LogoutURLNode(Node):
@@ -102,13 +99,42 @@ class LogoutURLNode(Node):
         return create_logout_url(self.logout_url)
 
 
+@register.tag(name='create_logout_url')
 def create_logout_url(parser, token):
     """
-    Inserts a Google Account logout url.
+    Creates a Google Account logout url and callback to a route_name.
+
+    For example::
+
+        {% create_logout_url route_name %}
     """
     try:
         tag_name, dest_url = token.split_contents()
     except ValueError:
         raise TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
     return LogoutURLNode(dest_url)
-create_logout_url = register.tag(create_logout_url)
+
+
+class LoginURLNode(Node):
+    def __init__(self, login_url):
+        self.login_url = login_url
+
+    def render(self, context):
+        from google.appengine.api.users import create_login_url
+        return create_login_url(self.login_url)
+
+
+@register.tag(name='create_login_url')
+def create_login_url(parser, token):
+    """
+    Creates a Google Account login url and callback to a route_name.
+
+    For example::
+
+        {% create_login_url route_name %}
+    """
+    try:
+        tag_name, dest_url = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
+    return LoginURLNode(dest_url)
