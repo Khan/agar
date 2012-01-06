@@ -1,13 +1,13 @@
-from webapp2 import WSGIApplication
 from webtest import Request
 from agar.url import uri_for
 from agar.test import BaseTest
 
+from api import application
 
 class UriTest(BaseTest):
     def setUp(self):
+        application.set_globals(application, Request.blank("/"))
         self.method = uri_for
-        WSGIApplication.request = Request.blank("/")
         super(UriTest, self).setUp()
 
     def test_get_uri(self):
