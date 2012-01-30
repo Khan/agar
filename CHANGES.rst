@@ -94,7 +94,7 @@ Changes
 .. _agar.templatetags: http://packages.python.org/agar/agar.html#module-agar.templatetags
 .. _agar.django.templates: http://packages.python.org/agar/agar.html#module-agar.django.templates
 .. _render_template_to_string(): http://packages.python.org/agar/agar.html#agar.django.templates.render_template_to_string
-.. _create_logout_url: http://packages.python.org/agar/agar.html#module-agar.templatetags.create_logout_url
+.. _create_logout_url: http://packages.python.org/agar/agar.html#agar.templatetags.webapp2.create_logout_url
 
 .. _get_application_id(): http://code.google.com/appengine/docs/python/appidentity/functions.html#get_application_id
 .. _get_serving_url(): http://packages.python.org/agar/agar.html#agar.image.Image.get_serving_url
