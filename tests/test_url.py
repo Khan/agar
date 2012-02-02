@@ -4,6 +4,7 @@ from agar.test import BaseTest
 
 from api import application
 
+
 class UriTest(BaseTest):
     def setUp(self):
         application.set_globals(application, Request.blank("/"))
@@ -15,8 +16,8 @@ class UriTest(BaseTest):
         self.assertEqual(uri, '/api/v1/model1')
 
     def test_get_invalid_uri_name(self):
+        invalid_uri_name = 'invalid-uri-name'
         try:
-            invalid_uri_name = 'invalid-uri-name'
             uri = uri_for(invalid_uri_name)
             self.fail("Got uri '%s' for invalid uri name '%s'" % (uri, invalid_uri_name))
         except Exception, e:

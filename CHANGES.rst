@@ -1,6 +1,5 @@
 Changes
 -------
-
 * **0.6** -- 2012-01-01
 
   * Removed alias for agar.url_for, use agar.uri_for
@@ -8,7 +7,7 @@ Changes
   * Removed templatetag for url_for, use uri_for
   
   * Moved agar.templatetags.webapp2 to agar.django.templatetags
-
+  
 * **0.5.1** -- 2011-11-22
 
   * `agar.test`_
@@ -95,7 +94,7 @@ Changes
 .. _agar.templatetags: http://packages.python.org/agar/agar.html#module-agar.templatetags
 .. _agar.django.templates: http://packages.python.org/agar/agar.html#module-agar.django.templates
 .. _render_template_to_string(): http://packages.python.org/agar/agar.html#agar.django.templates.render_template_to_string
-.. _create_logout_url: http://packages.python.org/agar/agar.html#module-agar.templatetags.create_logout_url
+.. _create_logout_url: http://packages.python.org/agar/agar.html#agar.templatetags.webapp2.create_logout_url
 
 .. _get_application_id(): http://code.google.com/appengine/docs/python/appidentity/functions.html#get_application_id
 .. _get_serving_url(): http://packages.python.org/agar/agar.html#agar.image.Image.get_serving_url
