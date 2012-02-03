@@ -27,6 +27,7 @@ sys.path[0:0] = [
     os.path.join(gae_path, 'lib', 'whoosh'),
     os.path.join(gae_path, 'lib', 'WebOb'),
     os.path.join(gae_path, 'lib', 'ipaddr'),
+    os.path.join(gae_path, 'lib', 'webapp2'),
 ]
 
 import unittest2
