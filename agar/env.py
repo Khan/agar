@@ -1,7 +1,6 @@
 """
 The ``agar.env`` module contains a number of constants to help determine which environment code is running in.
 """
-
 import os
 
 from google.appengine.api.app_identity import get_application_id
@@ -16,11 +15,13 @@ if have_appserver:
     appid = get_application_id()
 else:
     try:
-        project_dir = os.path.dirname(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+        project_dirname = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        project_dir = os.path.abspath(project_dirname)
         from google.appengine.tools import dev_appserver
         appconfig, matcher, from_cache = dev_appserver.LoadAppConfig(project_dir, {})
         appid = appconfig.application
     except ImportError:
+        dev_appserver = None
         appid = None
 
 #: ``True`` if running in the dev server, ``False`` otherwise.
