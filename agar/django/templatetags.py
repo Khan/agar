@@ -83,7 +83,11 @@ def on_production_server():
     Returns whether the code is running on a production server. See :py:func:`~agar.env.on_production_server` for
     more information.
 
-    :return: ``True`` if running on a production server, ``False`` otherwise.
+    For example::
+
+        {% if on_production_server %}
+            <do something>
+        {% endif %}
     """
     from agar.env import on_production_server
     return on_production_server

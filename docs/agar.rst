@@ -52,9 +52,9 @@ agar.django.decorators
 .. automodule:: agar.django.decorators
     :members:
 
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 agar.django.forms
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 .. automodule:: agar.django.forms
     :members:
 
@@ -63,6 +63,16 @@ agar.django.templates
 ^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: agar.django.templates
     :members:
+
+^^^^^^^^^^^^^^^^^^^^^^^^
+agar.django.templatetags
+^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: agar.django.templatetags
+
+.. autofunction:: agar.django.templatetags.uri_for
+.. autofunction:: agar.django.templatetags.on_production_server
+.. autofunction:: agar.django.templatetags.create_logout_url
+.. autofunction:: agar.django.templatetags.create_login_url
 
 --------
 agar.env
@@ -116,15 +126,6 @@ agar.sessions
 -------------
 .. automodule:: agar.sessions
     :members:
-
------------------
-agar.templatetags
------------------
-.. automodule:: agar.templatetags
-
-.. autodata:: agar.templatetags.webapp2.url_for
-.. autodata:: agar.templatetags.webapp2.on_production_server
-.. autodata:: agar.templatetags.webapp2.create_logout_url
 
 ---------
 agar.test
