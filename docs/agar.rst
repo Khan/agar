@@ -86,7 +86,15 @@ agar.image
 .. automodule:: agar.image
 .. autoclass:: agar.image.Image()
     :members:
-    :exclude-members: create
+    :exclude-members: create, get, get_or_insert, gql, all, dynamic_properties, entity_type, fields, from_entity, get_by_id, get_by_key_name, has_key, instance_properties, is_saved, key, kind, parent, parent_key, properties, put, save, to_xml
+    :inherited-members:
+
+    .. automethod:: create(blob_info=None, data=None, filename=None, url=None, mime_type=None, parent=None, key_name=None)
+
+.. autoclass:: agar.image.NdbImage()
+    :members:
+    :exclude-members: create, allocate_ids, get_by_id, get_or_insert, to_dict, allocate_ids_async, create_new_entity, get_by_id_async, get_or_insert_async, populate, put, put_async, query
+    :inherited-members:
 
     .. automethod:: create(blob_info=None, data=None, filename=None, url=None, mime_type=None, parent=None, key_name=None)
 

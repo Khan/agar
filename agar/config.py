@@ -79,8 +79,9 @@ class Config(object):
 
         The ``ConfigHandle`` is cached on the class level after the first call to this method.
 
-        :param _cache: Get and (if necessary) set the cached config. Note that if you are passing in ``kwargs`` and the
-            config comes out of the cache, your override values may not be applied.
+        :param _cache: If ``True``, get from and (if necessary) set the class-level cached config. Note that if you are
+            passing in ``kwargs`` and the config comes out of the cache, your override values may not be applied
+            (Default: ``False``).
         :param kwargs: Defaults to use for the config instance. Values in ``appengine_config.py`` will still override
             any values you specify.
         :return: The `google.appengine.api.lib_config`_ ``ConfigHandle`` for the class.
@@ -90,7 +91,7 @@ class Config(object):
                 if not cls._config:
                     cls._config = lib_config.register(cls._prefix, cls(**kwargs).defaults)
         else:
-            cls._config = lib_config.register(cls._prefix, cls(**kwargs).defaults)
+            return lib_config.register(cls._prefix, cls(**kwargs).defaults)
         return cls._config
 
     @classmethod

@@ -38,7 +38,7 @@ class ImageConfig(Config):
     #: Valid image mime types (Default: ``['image/jpeg', 'image/png', 'image/gif']``).
     VALID_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 
-#: *DEPRECATED*: Use `~agar.image.ImageConfig.get_config`. The configuration object for ``agar.image`` settings.
+#: **DEPRECATED** Use `~agar.image.ImageConfig.get_config`. The configuration object for ``agar.image`` settings.
 config = ImageConfig.get_config(_cache=True)
 
 
@@ -227,6 +227,7 @@ class Image(db.Model, BaseImage):
         return None
     def set_blob_key(self, blob_key):
         self.blob_info = blob_key
+    #: The `BlobKey`_ entity for the image's `Blobstore`_ value.
     blob_key = property(get_blob_key, set_blob_key)
 
     def delete(self, **kwargs):
@@ -259,14 +260,14 @@ class NdbImage(model.Model, BaseImage):
     def model_key(self):
         return self.key
 
-    @property
-    def blob_info(self):
-        """
-        The `BlobInfo`_ entity for the image's `Blobstore`_ value.
-        """
+    def get_blob_info(self):
         if self.blob_key is not None:
             return blobstore.BlobInfo(self.blob_key)
         return None
+    def set_blob_info(self, blob_info):
+        self.blob_key = blob_info.key()
+    #: The `BlobInfo`_ entity for the image's `Blobstore`_ value.
+    blob_info = property(get_blob_info, set_blob_info)
 
     def delete(self):
         """
