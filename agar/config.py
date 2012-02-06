@@ -1,6 +1,7 @@
 """
 The ``agar.config`` module contains a class to help work with the `google.appengine.api.lib_config`_ configuration library.
 """
+import threading
 
 from google.appengine.api import lib_config
 
@@ -45,6 +46,8 @@ class Config(object):
         >>> config.STRING_CONFIG == custom_config.STRING_CONFIG == 'settingstring'
         True
     """
+    _config = None
+    _config_lock = threading.RLock()
 
     #: The appengine_config prefix that the configs should appear under. Override in subclasses. The default is ``agar``.
     _prefix = 'agar'
@@ -68,17 +71,27 @@ class Config(object):
         return c
 
     @classmethod
-    def get_config(cls, **kwargs):
+    def get_config(cls, _cache=False, **kwargs):
         """
         Registers and returns the `google.appengine.api.lib_config`_ ``ConfigHandle`` for the class. Keyword arguments
         will override default values defined in the :py:class:`~agar.config.Config` subclass (but, of course,
         will still defer to values in the ``appengine_config.py`` file).
 
+        The ``ConfigHandle`` is cached on the class level after the first call to this method.
+
+        :param _cache: Get and (if necessary) set the cached config. Note that if you are passing in ``kwargs`` and the
+            config comes out of the cache, your override values may not be applied.
         :param kwargs: Defaults to use for the config instance. Values in ``appengine_config.py`` will still override
             any values you specify.
         :return: The `google.appengine.api.lib_config`_ ``ConfigHandle`` for the class.
         """
-        return lib_config.register(cls._prefix, cls(**kwargs).defaults)
+        if _cache:
+            with cls._config_lock:
+                if not cls._config:
+                    cls._config = lib_config.register(cls._prefix, cls(**kwargs).defaults)
+        else:
+            cls._config = lib_config.register(cls._prefix, cls(**kwargs).defaults)
+        return cls._config
 
     @classmethod
     def get_config_as_dict(cls, **kwargs):

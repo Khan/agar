@@ -11,6 +11,7 @@ import urlparse
 from google.appengine.api import images, memcache, files, urlfetch
 
 from google.appengine.ext import db, blobstore
+from google.appengine.ext.ndb import model
 
 from agar.config import Config
 
@@ -21,7 +22,7 @@ class ImageConfig(Config):
     Settings are under the ``agar_image`` namespace.
 
     The following settings (and defaults) are provided::
-    
+
         agar_image_SERVING_URL_TIMEOUT = 60*60
         agar_image_SERVING_URL_LOOKUP_TRIES = 3
         agar_image_VALID_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
@@ -37,35 +38,11 @@ class ImageConfig(Config):
     #: Valid image mime types (Default: ``['image/jpeg', 'image/png', 'image/gif']``).
     VALID_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif']
 
-#: The configuration object for ``agar.image`` settings.
-config = ImageConfig.get_config()
+#: *DEPRECATED*: Use `~agar.image.ImageConfig.get_config`. The configuration object for ``agar.image`` settings.
+config = ImageConfig.get_config(_cache=True)
 
 
-class Image(db.Model):
-    """
-    A model class that helps create and work with images stored in the `Blobstore`_.
-    Please note that you should never call the constructor for this class directly when creating an image.
-    Instead, use the :py:meth:`create` method.
-    """
-    #: The `BlobInfo`_ entity for the image's `Blobstore`_ value.
-    blob_info = blobstore.BlobReferenceProperty(required=False, default=None)
-    #: The original URL that the image data was fetched from, if applicable.
-    source_url = db.StringProperty(required=False, default=None)
-    #: The create timestamp.
-    created = db.DateTimeProperty(auto_now_add=True)
-    #: The last modified timestamp.
-    modified = db.DateTimeProperty(auto_now=True)
-
-    #noinspection PyUnresolvedReferences
-    @property
-    def blob_key(self):
-        """
-        The `BlobKey`_ entity for the image's `Blobstore`_ value.
-        """
-        if self.blob_info is not None:
-            return self.blob_info.key()
-        return None
-
+class BaseImage(object):
     @property
     def image(self):
         """
@@ -94,7 +71,7 @@ class Image(db.Model):
         if self.image is not None:
             return self.image.width
         return None
-    
+
     @property
     def height(self):
         """
@@ -126,11 +103,11 @@ class Image(db.Model):
             See `Image.get_serving_url`_ for more detailed argument information.
         :return: The serving URL for the image (see `Image.get_serving_url`_ for more detailed information).
         """
+        config = ImageConfig.get_config(_cache=True)
         serving_url = None
         if self.blob_key is not None:
             namespace = "agar-image-serving-url"
-            key = "%s-%s-%s" % (self.key(), size, crop)
-            #noinspection PyArgumentList
+            key = "%s-%s-%s" % (self.model_key, size, crop)
             serving_url = memcache.get(key, namespace=namespace)
             if serving_url is None:
                 tries = 0
@@ -144,20 +121,12 @@ class Image(db.Model):
                         if tries >= config.SERVING_URL_LOOKUP_TRIES:
                             logging.error("Unable to get image serving URL: %s" % e)
                 if serving_url is not None:
-                    #noinspection PyArgumentList
                     memcache.set(key, serving_url, time=config.SERVING_URL_TIMEOUT, namespace=namespace)
         return serving_url
 
-    #noinspection PyUnresolvedReferences
-    def delete(self, **kwargs):
-        """
-        Delete the image and its attached `Blobstore`_ storage.
-
-        :param kwargs: Parameters to be passed to parent classes ``delete()`` method.
-        """
-        if self.blob_info is not None:
-            self.blob_info.delete()
-        super(Image, self).delete(**kwargs)
+    @classmethod
+    def get_entity(cls, key):
+        return db.get(key)
 
     @classmethod
     def create_new_entity(cls, **kwargs):
@@ -212,9 +181,9 @@ class Image(db.Model):
         if data is None:
             raise db.Error("No image data")
         image = cls.create_new_entity(source_url=url, **kwargs)
-        filename = filename or str(image.key())
+        filename = filename or str(image.model_key)
         mime_type = mime_type or mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-        if mime_type not in config.VALID_MIME_TYPES:
+        if mime_type not in ImageConfig.get_config(_cache=True).VALID_MIME_TYPES:
             message = "The image mime type (%s) isn't valid" % mime_type
             logging.warning(message)
             image.delete()
@@ -223,11 +192,102 @@ class Image(db.Model):
         with files.open(blob_file_name, 'a') as f:
             f.write(data)
         files.finalize(blob_file_name)
-        image.blob_info = files.blobstore.get_blob_key(blob_file_name)
+        image.blob_key = files.blobstore.get_blob_key(blob_file_name)
         image.put()
-        image = cls.get(str(image.key()))
+        image = cls.get_entity(image.model_key)
         if image is not None and image.blob_info is None:
             logging.error("Failed to create image: %s" % filename)
             image.delete()
             image = None
+        return image
+
+
+class Image(db.Model, BaseImage):
+    """
+    A model class that helps create and work with images stored in the `Blobstore`_.
+    Please note that you should never call the constructor for this class directly when creating an image.
+    Instead, use the :py:meth:`create` method.
+    """
+    #: The `BlobInfo`_ entity for the image's `Blobstore`_ value.
+    blob_info = blobstore.BlobReferenceProperty()
+    #: The original URL that the image data was fetched from, if applicable.
+    source_url = db.StringProperty(required=False, default=None)
+    #: The create timestamp.
+    created = db.DateTimeProperty(auto_now_add=True)
+    #: The last modified timestamp.
+    modified = db.DateTimeProperty(auto_now=True)
+
+    @property
+    def model_key(self):
+        return self.key()
+
+    def get_blob_key(self):
+        if self.blob_info is not None:
+            return self.blob_info.key()
+        return None
+    def set_blob_key(self, blob_key):
+        self.blob_info = blob_key
+    blob_key = property(get_blob_key, set_blob_key)
+
+    def delete(self, **kwargs):
+        """
+        Delete the image and its attached `Blobstore`_ storage.
+
+        :param kwargs: Parameters to be passed to parent classes ``delete()`` method.
+        """
+        if self.blob_info is not None:
+            self.blob_info.delete()
+        super(Image, self).delete(**kwargs)
+
+
+class NdbImage(model.Model, BaseImage):
+    """
+    An NDB model class that helps create and work with images stored in the `Blobstore`_.
+    Please note that you should never call the constructor for this class directly when creating an image.
+    Instead, use the :py:meth:`create` method.
+    """
+    #: The `BlobKey`_ entity for the image's `Blobstore`_ value.
+    blob_key = model.BlobKeyProperty(required=False)
+    #: The original URL that the image data was fetched from, if applicable.
+    source_url = model.StringProperty(required=False, default=None)
+    #: The create timestamp.
+    created = model.DateTimeProperty(auto_now_add=True)
+    #: The last modified timestamp.
+    modified = model.DateTimeProperty(auto_now=True)
+
+    @property
+    def model_key(self):
+        return self.key
+
+    @property
+    def blob_info(self):
+        """
+        The `BlobInfo`_ entity for the image's `Blobstore`_ value.
+        """
+        if self.blob_key is not None:
+            return blobstore.BlobInfo(self.blob_key)
+        return None
+
+    def delete(self):
+        """
+        Delete the image and its attached `Blobstore`_ storage.
+        """
+        if self.blob_info is not None:
+            self.blob_info.delete()
+        self.model_key.delete()
+
+    @classmethod
+    def get_entity(cls, key):
+        return key.get()
+
+    @classmethod
+    def create_new_entity(cls, **kwargs):
+        """
+        Called to create a new entity. The default implementation simply creates the entity with the default constructor
+        and calls ``put()``. This method allows the class to be mixed-in with :py:class:`agar.models.NamedModel`.
+
+        :param kwargs: Parameters to be passed to the constructor.
+        """
+        image = cls(**kwargs)
+        image.put()
         return image
