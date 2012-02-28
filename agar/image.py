@@ -9,11 +9,16 @@ import mimetypes
 import urlparse
 
 from google.appengine.api import images, memcache, files, urlfetch
+from google.appengine.api.images import NotImageError
 
 from google.appengine.ext import db, blobstore
-from google.appengine.ext.ndb import model
+#from google.appengine.ext.ndb import model   #TODO: Uncomment and remove /lib/usr version when the official in the SDK
+from ndb import model
 
 from agar.config import Config
+
+
+TESTBED_INSTANCE = None
 
 
 class ImageConfig(Config):
@@ -59,7 +64,12 @@ class BaseImage(object):
         If there is no image data, this will be ``None``.
         """
         if self.image is not None:
-            return self.image.format
+            try:
+                return self.image.format
+            except NotImageError:
+                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                img = images.Image(image_data=data)
+                return img.format
         return None
 
     @property
@@ -69,7 +79,12 @@ class BaseImage(object):
         If there is no image data, this will be ``None``.
         """
         if self.image is not None:
-            return self.image.width
+            try:
+                return self.image.width
+            except NotImageError:
+                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                img = images.Image(image_data=data)
+                return img.width
         return None
 
     @property
@@ -79,7 +94,12 @@ class BaseImage(object):
         If there is no image data, this will be ``None``.
         """
         if self.image is not None:
-            return self.image.height
+            try:
+                return self.image.height
+            except NotImageError:
+                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                img = images.Image(image_data=data)
+                return img.height
         return None
 
     @property
@@ -141,13 +161,15 @@ class BaseImage(object):
         return image
 
     @classmethod
-    def create(cls, blob_info=None, data=None, filename=None, url=None, mime_type=None, **kwargs):
+    def create(cls, blob_key=None, blob_info=None, data=None, filename=None, url=None, mime_type=None, blobstore_stub=None, **kwargs):
         """
         Create an ``Image``. Use this class method rather than creating an image with the constructor. You must provide one
         of the following parameters ``blob_info``, ``data``, or ``url`` to specify the image data to use.
 
+        :param blob_key: The `Blobstore`_ data to use as the image data. If this parameter is not ``None``, all
+            other parameters will be ignored as they are not needed (Only use with `NdbImage`).
         :param blob_info: The `Blobstore`_ data to use as the image data. If this parameter is not ``None``, all
-            other parameters will be ignored as they are not needed.
+            other parameters will be ignored as they are not needed (Do not use with `NdbImage`).
         :param data: The image data that should be put in the `Blobstore`_ and used as the image data.
         :param filename: The filename of the image data. If not provided, the filename will be guessed from the URL
             or, if there is no URL, it will be set to the stringified `Key`_ of the image entity.
@@ -168,7 +190,16 @@ class BaseImage(object):
         if url is not None:
             url = url.encode('ascii', 'ignore')
         if blob_info is not None:
-            kwargs['blob_info'] = blob_info
+            if issubclass(cls, Image):
+                kwargs['blob_info'] = blob_info
+            else:
+                kwargs['blob_key'] = blob_info.key()
+            return cls.create_new_entity(**kwargs)
+        if blob_key is not None:
+            if issubclass(cls, NdbImage):
+                kwargs['blob_key'] = blob_key
+            else:
+                kwargs['blob_info'] = blob_key
             return cls.create_new_entity(**kwargs)
         if data is None:
             if url is not None:
@@ -188,11 +219,20 @@ class BaseImage(object):
             logging.warning(message)
             image.delete()
             raise images.BadImageError(message)
-        blob_file_name = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=filename)
-        with files.open(blob_file_name, 'a') as f:
-            f.write(data)
-        files.finalize(blob_file_name)
-        image.blob_key = files.blobstore.get_blob_key(blob_file_name)
+        try:
+            blob_file_name = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=filename)
+            with files.open(blob_file_name, 'a') as f:
+                f.write(data)
+            files.finalize(blob_file_name)
+            image.blob_key = files.blobstore.get_blob_key(blob_file_name)
+        except AssertionError:
+            # Needed to create an Image from url or image_data in a unittest.
+            # Hopefully we can remove this when this bug is fixed:
+            # http://code.google.com/p/googleappengine/issues/detail?id=5301
+            global TESTBED_INSTANCE
+            _ = TESTBED_INSTANCE.get_stub('blobstore').CreateBlob(filename, data)
+            from google.appengine.ext.blobstore.blobstore import BlobKey
+            image.blob_key = BlobKey(filename)
         image.put()
         image = cls.get_entity(image.model_key)
         if image is not None and image.blob_info is None:
