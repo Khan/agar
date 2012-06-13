@@ -112,7 +112,7 @@ class BaseImage(object):
             return blobstore.BlobReader(self.blob_key).read()
         return None
 
-    def get_serving_url(self, size=None, crop=False):
+    def get_serving_url(self, size=None, crop=False, secure_url=None):
         """
         Returns the serving URL for the image. It works just like the `Image.get_serving_url`_ function,
         but adds caching. The cache timeout is controlled by the :py:attr:`.SERVING_URL_TIMEOUT` setting.
@@ -120,6 +120,8 @@ class BaseImage(object):
         :param size: An integer supplying the size of resulting images.
             See `Image.get_serving_url`_ for more detailed argument information.
         :param crop: Specify ``true`` for a cropped image, and ``false`` for a re-sized image.
+            See `Image.get_serving_url`_ for more detailed argument information.
+        :param secure_url: Specify ``true`` for a https url.
             See `Image.get_serving_url`_ for more detailed argument information.
         :return: The serving URL for the image (see `Image.get_serving_url`_ for more detailed information).
         """
@@ -134,7 +136,7 @@ class BaseImage(object):
                 while tries < config.SERVING_URL_LOOKUP_TRIES:
                     try:
                         tries += 1
-                        serving_url = images.get_serving_url(str(self.blob_key), size=size, crop=crop)
+                        serving_url = images.get_serving_url(str(self.blob_key), size=size, crop=crop, secure_url=secure_url)
                         if serving_url is not None:
                             break
                     except Exception, e:

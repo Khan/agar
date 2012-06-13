@@ -71,3 +71,4 @@ dev_appserver.SetupStubs(config.application, **args)
 if __name__ == "__main__":
     sys.argv = ['unit2', 'discover', '--start-directory', 'tests']
     main_()
+
