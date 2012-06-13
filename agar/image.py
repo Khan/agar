@@ -12,12 +12,12 @@ from google.appengine.api import images, memcache, files, urlfetch
 from google.appengine.api.images import NotImageError
 
 from google.appengine.ext import db, blobstore
-#from google.appengine.ext.ndb import model   #TODO: Uncomment and remove /lib/usr version when the official in the SDK
-from ndb import model
+from google.appengine.ext.ndb import model
 
 from agar.config import Config
 
 
+IMAGE_HEADER_SIZE = 50000
 TESTBED_INSTANCE = None
 
 
@@ -67,7 +67,7 @@ class BaseImage(object):
             try:
                 return self.image.format
             except NotImageError:
-                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                data = blobstore.fetch_data(self.blob_key, 0, IMAGE_HEADER_SIZE)
                 img = images.Image(image_data=data)
                 return img.format
         return None
@@ -82,7 +82,7 @@ class BaseImage(object):
             try:
                 return self.image.width
             except NotImageError:
-                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                data = blobstore.fetch_data(self.blob_key, 0, IMAGE_HEADER_SIZE)
                 img = images.Image(image_data=data)
                 return img.width
         return None
@@ -97,7 +97,7 @@ class BaseImage(object):
             try:
                 return self.image.height
             except NotImageError:
-                data = blobstore.fetch_data(self.blob_key, 0, 50000)
+                data = blobstore.fetch_data(self.blob_key, 0, IMAGE_HEADER_SIZE)
                 img = images.Image(image_data=data)
                 return img.height
         return None
