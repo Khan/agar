@@ -1,5 +1,9 @@
 Changes
 -------
+* **0.7** -- 2012-06-21
+
+  * Updated `agar.image`_ to work with NDB.
+
 * **0.6** -- 2012-01-01
 
   * Removed alias for agar.url_for, use agar.uri_for
