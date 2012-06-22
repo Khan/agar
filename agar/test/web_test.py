@@ -56,13 +56,13 @@ class WebTest(unittest.TestCase):
         """
         self.assertEqual(200, response.status_int)
 
-    def assertRedirects(self, response, to=None):
+    def assertRedirects(self, response, to=None, code=302):
         """
-        Assert that ``response`` was a 302 redirect.
+        Assert that ``response`` was a redirect.
 
         :param to: an absolute or relative URL that the redirect must match.
         """
-        self.assertEqual(302, response.status_int)
+        self.assertEqual(code, response.status_int)
         
         if to:
             if not to.startswith("http"):
